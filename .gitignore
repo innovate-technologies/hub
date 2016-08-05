@@ -1,0 +1,6 @@
+*~
+node_modules/*
+!node_modules/app
+npm-debug.log
+config/*
+!config/default.yml

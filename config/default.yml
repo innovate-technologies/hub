@@ -1,0 +1,12 @@
+---
+port: 3000
+
+publicStatus:
+  # Whether recent events should be shown publicly. Can include sensitive information.
+  enabled: false
+
+slack:
+  token: "xxx"
+  # Channels where innobot will be active.
+  channelNames:
+    - dev

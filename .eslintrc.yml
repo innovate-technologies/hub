@@ -1,0 +1,133 @@
+---
+env:
+  node: true
+  es6: true
+
+extends:
+  - "eslint:recommended"
+  - import/warnings
+  - import/es7-jsx
+
+parser: babel-eslint
+
+plugins:
+  - flowtype
+
+rules:
+  brace-style:
+    - error
+    - 1tbs
+    - allowSingleLine: true
+  callback-return:
+    - error
+    - - callback
+      - cb
+      - next
+  camelcase:
+    - error
+    - properties: always
+  comma-dangle:
+    - warn
+    - always-multiline
+  comma-spacing:
+    - error
+    - after: true
+      before: false
+  comma-style:
+    - error
+    - last
+  curly: error
+  dot-location:
+    - error
+    - property
+  dot-notation: error
+  eol-last: warn
+  eqeqeq: error
+  guard-for-in: error
+  handle-callback-err:
+    - error
+    - "^(err|error)$"
+  indent:
+    - error
+    - 2
+    - SwitchCase: 1
+  key-spacing:
+    - error
+    - afterColon: true
+      beforeColon: false
+  keyword-spacing: error
+  linebreak-style:
+    - error
+    - unix
+  object-curly-spacing:
+    - error
+    - always
+  new-cap:
+    - error
+    - newIsCap: true
+  no-else-return: error
+  no-extra-parens:
+    - error
+    - functions
+  no-loop-func: error
+  no-multi-spaces: error
+  no-multiple-empty-lines:
+    - 2
+    - max: 2
+  no-nested-ternary: error
+  no-new-object: error
+  no-new-require: error
+  no-sequences: error
+  no-shadow: error
+  no-spaced-func: error
+  no-throw-literal: error
+  no-trailing-spaces: error
+  no-undef-init: error
+  quotes:
+    - error
+    - double
+    - avoidEscape: true
+  semi:
+    - error
+    - always
+  semi-spacing:
+    - error
+    - after: true
+      before: false
+  space-before-blocks:
+    - error
+    - always
+  space-before-function-paren:
+    - error
+    - anonymous: always
+      named: never
+  space-infix-ops: error
+  spaced-comment:
+  - error
+  - always
+  - exceptions:
+    - "+"
+    - "-"
+    - "/"
+
+  flowtype/define-flow-type: warn
+  flowtype/require-parameter-type: warn
+  flowtype/require-return-type:
+    - warn
+    - always
+    - annotateUndefined: never
+  flowtype/space-after-type-colon:
+    - warn
+    - always
+  flowtype/space-before-type-colon:
+    - warn
+    - never
+  flowtype/type-id-match:
+    - warn
+    - "^([A-Z][a-z0-9]+)+Type$"
+  flowtype/use-flow-type: warn
+  flowtype/valid-syntax: warn
+
+settings:
+  flowtype:
+    onlyFilesWithFlowAnnotation: true
