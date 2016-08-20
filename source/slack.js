@@ -8,6 +8,15 @@ import { CLIENT_EVENTS, RTM_EVENTS, MemoryDataStore, RtmClient } from "@slack/cl
 import * as events from "app/events.js";
 import log from "app/logs.js";
 
+export class SlackMessageEvent extends events.Event {
+  from: string; channel: string; message: string; isDirect: bool;
+
+  constructor(from: string, channel: string, message: string, isDirect: bool) {
+    super();
+    Object.assign(this, { from, channel, message, isDirect });
+  }
+}
+
 const TOKEN: string = config.get("slack.token");
 const CHANNEL_NAMES: Array<string> = config.get("slack.channelNames");
 
@@ -32,7 +41,7 @@ rtm.on(RTM_EVENTS.MESSAGE, (message: MessageType) => {
     return;
   }
   events.dispatch("slack-rtm-" + message.team,
-                  new events.SlackMessageEvent(username, channelName, message.text, direct));
+                  new SlackMessageEvent(username, channelName, message.text, direct));
 });
 
 rtm.on(CLIENT_EVENTS.RTM.AUTHENTICATED, () => {

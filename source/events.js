@@ -25,32 +25,6 @@ export class InternalEvent extends Event {
   }
 }
 
-// Slack
-export class SlackMessageEvent extends Event {
-  from: string; channel: string; message: string; isDirect: bool;
-
-  constructor(from: string, channel: string, message: string, isDirect: bool) {
-    super();
-    Object.assign(this, { from, channel, message, isDirect });
-  }
-}
-
-// GitHub
-export class GHPullRequestEvent extends Event {
-  repo: string; id: number; title: string; author: string; url: string; action: string;
-  baseRefName: string; headRefName: string; baseSha: string; headSha: string;
-  isFromTrustedAuthor: boolean;
-
-  constructor(repo: string, id: number, title: string, author: string, url: string, action: string,
-              baseRefName: string, headRefName: string, baseSha: string, headSha: string,
-              isFromTrustedAuthor: boolean) {
-    super();
-    Object.assign(this, { repo, id, title, author, url, action,
-                          baseRefName, headRefName, baseSha, headSha, isFromTrustedAuthor });
-  }
-}
-
-
 type MapOfEventsType = { [eventType: string]: Array<Event> };
 export const recentEvents: MapOfEventsType = {};
 
