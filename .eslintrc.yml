@@ -124,7 +124,7 @@ rules:
     - never
   flowtype/type-id-match:
     - warn
-    - "^([A-Z][a-z0-9]+)+Type$"
+    - "^([A-Z]+[a-z0-9]+)+$"
   flowtype/use-flow-type: warn
   flowtype/valid-syntax: warn
 
