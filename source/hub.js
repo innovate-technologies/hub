@@ -16,3 +16,4 @@ require("app/http.js");
 
 require("app/github.js");
 require("app/slack.js");
+require("app/whmcs.js");

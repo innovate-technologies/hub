@@ -13,3 +13,14 @@ export const reverseForEach = (array: Array<any>, fn: Function): void => {
     fn(array[i]);
   }
 };
+
+export class AccessDeniedError extends Error {
+  statusCode: number;
+  constructor(message: ?string) {
+    super();
+    this.message = message || "Access denied";
+    this.stack = (new Error()).stack;
+    this.name = this.constructor.name;
+    this.statusCode = 403;
+  }
+}

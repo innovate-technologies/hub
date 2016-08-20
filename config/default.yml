@@ -7,6 +7,12 @@ publicStatus:
 
 slack:
   token: "xxx"
-  # Channels where innobot will be active.
+  # Channels where innobot will be active and listening.
   channelNames:
     - dev
+  # Channels where notifications will be sent.
+  notify:
+    support: support
+
+whmcs:
+  token: "xxx"

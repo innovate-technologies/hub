@@ -11,9 +11,10 @@ import express from "express";
 import * as _ from "lodash";
 import validator from "validator";
 
-import { Event, recentEvents } from "app/events.js";
+import * as events from "app/events.js";
 import log from "app/logs.js";
 import * as utils from "app/utils.js";
+import * as whmcs from "app/whmcs.js";
 
 // Used in route handlers to catch async exceptions as if they were synchronous.
 // const wrapAsync = fn => (...args) => fn(...args).catch(args[2]);
@@ -35,26 +36,73 @@ app.use(function (req, res, next) {
 // Status page
 app.get("/", (req, res) => {
   if (!config.get("publicStatus.enabled")) {
-    res.status(403).json({ error: "Access denied" });
-    return;
+    throw new utils.AccessDeniedError();
   }
   res.set("Content-Type", "text/html");
   res.write('<!DOCTYPE html><html><head><meta charset="utf-8"><title>Status for Hub</title></head><body>');
   res.write("<h2>Status for Hub</h2>");
-  const printRecentEvents = (events: Array<Event>): void => {
+  const printRecentEvents = (evts: Array<events.Event>): void => {
     res.write("<pre>");
-    utils.reverseForEach(events, (event: Event) =>
+    utils.reverseForEach(evts, (event: events.Event) =>
       res.write(util.format("%s   %s\n", event.date.toISOString(),
                 validator.escape(utils.objectToString(_.omit(event, "date")))))
     );
     res.write("</pre>");
   };
-  for (const eventType of Object.keys(recentEvents)) {
+  for (const eventType of Object.keys(events.recentEvents)) {
     res.write(`<h3>Recent events for ${eventType}</h3>`);
-    printRecentEvents(recentEvents[eventType]);
+    printRecentEvents(events.recentEvents[eventType]);
   }
   res.write("<style>body { font-family: Roboto, serif; }</style></body></html>");
   res.send();
+});
+
+// WHMCS
+const WHMCS_TOKEN: string = config.get("whmcs.token");
+app.post("/whmcs/ticket*", (req, res, next) => {
+  if (req.body.token !== WHMCS_TOKEN) {
+    throw new utils.AccessDeniedError("Invalid token");
+  }
+  try {
+    // This can throw, and we don't care because this is what we want.
+    const { id, title, clientId, clientName, message } = req.body.ticket;
+    req.ticket = new whmcs.Ticket(id, title, clientId, clientName, message);
+  } catch (error) {
+    throw new Error("Missing information.");
+  }
+  next();
+});
+
+app.post("/whmcs/ticket-open", (req, res) => {
+  const { who } = req.body;
+  events.dispatch("http", new whmcs.WHMCSTicketOpenEvent(req.ticket, who));
+  res.status(204).send();
+});
+
+app.post("/whmcs/ticket-reply-or-note", (req, res) => {
+  const { type, who, message, status } = req.body;
+  if (!["ReplyFromClient", "ReplyFromStaff", "Note"].includes(type)) {
+    throw new Error("Unexpected type.");
+  }
+  events.dispatch("http", new whmcs.WHMCSTicketObjectEvent(type, req.ticket, who, message, status));
+  if (type === "ReplyFromStaff") {
+    // Dispatch the status changed ourselves, since WHMCS doesn't do it for us.
+    events.dispatch("http", new whmcs.WHMCSTicketStatusChangeEvent(req.ticket, who, status));
+  }
+
+  res.status(204).send();
+});
+
+app.post("/whmcs/ticket-flag", (req, res) => {
+  const { who, flaggedTo } = req.body;
+  events.dispatch("http", new whmcs.WHMCSTicketFlagEvent(req.ticket, who, flaggedTo));
+  res.status(204).send();
+});
+
+app.post("/whmcs/ticket-status-change", (req, res) => {
+  const { who, newStatus } = req.body;
+  events.dispatch("http", new whmcs.WHMCSTicketStatusChangeEvent(req.ticket, who, newStatus));
+  res.status(204).send();
 });
 
 // Error handlers
