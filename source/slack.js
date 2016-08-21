@@ -3,11 +3,14 @@
 // @flow
 
 import config from "config";
+import { Html5Entities as Entities } from "html-entities";
 import { CLIENT_EVENTS, RTM_EVENTS, MemoryDataStore, RtmClient, WebClient } from "@slack/client";
 
 import * as events from "app/events.js";
 import log from "app/logs.js";
 import * as whmcs from "app/whmcs.js";
+
+const entities = new Entities();
 
 export class SlackMessageEvent extends events.Event {
   from: string; channel: string; message: string; isDirect: bool;
@@ -15,6 +18,7 @@ export class SlackMessageEvent extends events.Event {
   constructor(from: string, channel: string, message: string, isDirect: bool) {
     super();
     Object.assign(this, { from, channel, message, isDirect });
+    this.message = entities.decode(this.message);
   }
 }
 

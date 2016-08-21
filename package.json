@@ -16,9 +16,9 @@
     "bunyan": "^1.5.0",
     "config": "^1.17.0",
     "express": "^4.13.0",
+    "html-entities": "^1.2.0",
     "js-yaml": "^3.4.0",
-    "lodash": "^4.15.0",
-    "validator": "^5.5.0"
+    "lodash": "^4.15.0"
   },
   "devDependencies": {
     "babel-eslint": "^6.0.0",

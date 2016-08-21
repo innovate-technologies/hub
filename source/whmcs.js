@@ -2,9 +2,11 @@
 // This file is part of hub. Refer to license.txt for more information.
 // @flow
 
-import * as validator from "validator";
+import { Html5Entities as Entities } from "html-entities";
 
 import * as events from "app/events.js";
+
+const entities = new Entities();
 
 export class Ticket {
   id: string; title: string; clientId: string; clientName: string; message: string;
@@ -12,7 +14,7 @@ export class Ticket {
 
   constructor(id: string, title: string, clientId: string, clientName: string, message: string) {
     Object.assign(this, { id, title, clientId, clientName, message });
-    this.message = validator.unescape(this.message);
+    this.message = entities.decode(this.message);
     this.link = `https://my.shoutca.st/admin/supporttickets?action=view&id=${this.id}`;
   }
 }
@@ -54,5 +56,6 @@ export class WHMCSTicketObjectEvent extends events.Event {
   constructor(type: WHMCSTicketObjectType, ticket: Ticket, who: string, message: string, status: string) {
     super();
     Object.assign(this, { type, ticket, who, message, status });
+    this.message = entities.decode(this.message);
   }
 }

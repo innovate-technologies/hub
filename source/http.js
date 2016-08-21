@@ -8,13 +8,15 @@ import util from "util";
 import bodyParser from "body-parser";
 import config from "config";
 import express from "express";
+import { Html5Entities as Entities } from "html-entities";
 import * as _ from "lodash";
-import validator from "validator";
 
 import * as events from "app/events.js";
 import log from "app/logs.js";
 import * as utils from "app/utils.js";
 import * as whmcs from "app/whmcs.js";
+
+const entities = new Entities();
 
 // Used in route handlers to catch async exceptions as if they were synchronous.
 // const wrapAsync = fn => (...args) => fn(...args).catch(args[2]);
@@ -46,7 +48,7 @@ app.get("/", (req, res) => {
     res.write("<pre>");
     utils.reverseForEach(evts, (event: events.Event) =>
       res.write(util.format("%s   %s\n", event.date.toISOString(),
-                validator.escape(utils.objectToString(_.omit(event, "date")))))
+                entities.encode(utils.objectToString(_.omit(event, "date")))))
     );
     res.write("</pre>");
   };
