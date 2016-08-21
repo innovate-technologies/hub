@@ -86,11 +86,6 @@ app.post("/whmcs/ticket-reply-or-note", (req, res) => {
     throw new Error("Unexpected type.");
   }
   events.dispatch("http", new whmcs.WHMCSTicketObjectEvent(type, req.ticket, who, message, status));
-  if (type === "ReplyFromStaff") {
-    // Dispatch the status changed ourselves, since WHMCS doesn't do it for us.
-    events.dispatch("http", new whmcs.WHMCSTicketStatusChangeEvent(req.ticket, who, status));
-  }
-
   res.status(204).send();
 });
 
