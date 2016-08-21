@@ -20,6 +20,7 @@ import * as whmcs from "app/whmcs.js";
 // const wrapAsync = fn => (...args) => fn(...args).catch(args[2]);
 
 const app = express();
+app.enable("trust proxy");
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(function (req, res, next) {
