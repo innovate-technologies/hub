@@ -2,6 +2,8 @@
 // This file is part of hub. Refer to license.txt for more information.
 // @flow
 
+import * as validator from "validator";
+
 import * as events from "app/events.js";
 
 export class Ticket {
@@ -10,6 +12,7 @@ export class Ticket {
 
   constructor(id: string, title: string, clientId: string, clientName: string, message: string) {
     Object.assign(this, { id, title, clientId, clientName, message });
+    this.message = validator.unescape(this.message);
     this.link = `https://my.shoutca.st/admin/supporttickets?action=view&id=${this.id}`;
   }
 }
