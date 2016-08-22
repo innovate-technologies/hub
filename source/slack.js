@@ -44,7 +44,7 @@ rtm.on(RTM_EVENTS.MESSAGE, (message: MessageType) => {
   const direct: bool = message.text.includes(`<@${rtm.activeUserId}>`);
   const username: string = rtm.dataStore.getUserById(message.user).name;
   const channelName: string = rtm.dataStore.getChannelGroupOrDMById(message.channel).name;
-  if (!direct && !CHANNEL_NAMES.includes(channelName)) {
+  if (!direct || !CHANNEL_NAMES.includes(channelName)) {
     return;
   }
   events.dispatch("slack-rtm-" + message.team,
