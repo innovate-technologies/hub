@@ -57,9 +57,15 @@ rtm.on(CLIENT_EVENTS.RTM.AUTHENTICATED, () => {
 
 rtm.start();
 
+export const sendMessage = (channel: string, message: string) => {
+  return web.chat.postMessage(channel, message, { "as_user": true });
+};
+
 const formatName = (name: string): string => {
   return "_" + name.charAt(0) + "\ufeff" + name.slice(1) + "_";
 };
+
+// WHMCS support notifications
 
 const SUPPORT_CHANNEL = config.get("slack.notify.support");
 events.listen(whmcs.WHMCSTicketOpenEvent.name, async (event: whmcs.WHMCSTicketOpenEvent) => {
