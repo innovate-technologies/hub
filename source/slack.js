@@ -133,6 +133,10 @@ events.listen(whmcs.WHMCSTicketStatusChangeEvent.name, async (event: whmcs.WHMCS
 });
 
 {
+  const filterOutSignature = (message: string): string => {
+    return message.split("Kindest Regards")[0];
+  };
+
   const eventTypeActionMap: { [eventType: whmcs.WHMCSTicketObjectType]: string } = {
     "ReplyFromClient": "replied to",
     "ReplyFromStaff": "replied to",
@@ -158,7 +162,7 @@ events.listen(whmcs.WHMCSTicketStatusChangeEvent.name, async (event: whmcs.WHMCS
             "author_name": event.who,
             color: eventTypeColourMap[event.type],
             fallback: event.ticket.link,
-            text: event.message,
+            text: filterOutSignature(event.message),
           },
         ],
         "as_user": true,
