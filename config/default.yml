@@ -13,6 +13,8 @@ slack:
   # Channels where notifications will be sent.
   notify:
     support: support
+  # Trusted people that can use bot commands.
+  trustedPeople: []
 
 whmcs:
   token: "xxx"
