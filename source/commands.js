@@ -18,7 +18,7 @@ events.listen(SlackMessageEvent.name, async (event: SlackMessageEvent) => {
   const trusted: bool = TRUSTED_PEOPLE.includes(event.from);
 
   if (trusted && event.message.endsWith("restart")) {
-    await sendMessage(event.channel, "Bye, see you later");
+    await sendMessage(event.channel, "See ya all later byeeeee");
     log.info(event, "Restarting (as requested)");
     process.exit(0);
     return;
