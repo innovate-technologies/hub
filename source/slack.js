@@ -62,7 +62,7 @@ export const sendMessage = (channel: string, message: string) => {
 };
 
 const formatName = (name: string): string => {
-  return "_" + name.charAt(0) + "\u180e" + name.slice(1) + "_";
+  return "_" + name.charAt(0) + "\u2060" + name.slice(1) + "_";
 };
 
 // WHMCS support notifications
