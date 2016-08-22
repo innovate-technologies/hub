@@ -57,9 +57,13 @@ rtm.on(CLIENT_EVENTS.RTM.AUTHENTICATED, () => {
 
 rtm.start();
 
+const formatName = (name: string): string => {
+  return "_" + name.charAt(0) + "\ufeff" + name.slice(1) + "_";
+};
+
 const SUPPORT_CHANNEL = config.get("slack.notify.support");
 events.listen(whmcs.WHMCSTicketOpenEvent.name, async (event: whmcs.WHMCSTicketOpenEvent) => {
-  const message: string = `[whmcs-support] _${event.who}_ opened <${event.ticket.link}\
+  const message: string = `[whmcs-support] ${formatName(event.who)} opened <${event.ticket.link}\
 |ticket #${event.ticket.id} (${event.ticket.title})> for client _${event.ticket.clientName}_`;
   try {
     await web.chat.postMessage(SUPPORT_CHANNEL, message, {
@@ -82,9 +86,9 @@ events.listen(whmcs.WHMCSTicketOpenEvent.name, async (event: whmcs.WHMCSTicketOp
 
 events.listen(whmcs.WHMCSTicketFlagEvent.name, async (event: whmcs.WHMCSTicketFlagEvent) => {
   const message: string = (event.who === event.flaggedTo)
-      ? `[whmcs-support] _${event.who}_ flagged <${event.ticket.link}|ticket #${event.ticket.id} ` +
+      ? `[whmcs-support] ${formatName(event.who)} flagged <${event.ticket.link}|ticket #${event.ticket.id} ` +
         `(${event.ticket.title})> to themselves`
-      : `[whmcs-support] _${event.who}_ flagged <${event.ticket.link}|ticket #${event.ticket.id} ` +
+      : `[whmcs-support] ${formatName(event.who)} flagged <${event.ticket.link}|ticket #${event.ticket.id} ` +
         `(${event.ticket.title})> to _${event.flaggedTo}_`;
 
   try {
@@ -113,7 +117,7 @@ events.listen(whmcs.WHMCSTicketStatusChangeEvent.name, async (event: whmcs.WHMCS
   if (IGNORED_STATUSES.includes(event.newStatus)) {
     return;
   }
-  const message: string = `[whmcs-support] _${event.who}_ changed status for <${event.ticket.link}` +
+  const message: string = `[whmcs-support] ${formatName(event.who)} changed status for <${event.ticket.link}` +
       `|ticket #${event.ticket.id} (${event.ticket.title})> to ${event.newStatus}`;
   try {
     await web.chat.postMessage(SUPPORT_CHANNEL, message, { "as_user": true });
@@ -136,10 +140,10 @@ events.listen(whmcs.WHMCSTicketStatusChangeEvent.name, async (event: whmcs.WHMCS
 
   events.listen(whmcs.WHMCSTicketObjectEvent.name, async (event: whmcs.WHMCSTicketObjectEvent) => {
     const action: string = eventTypeActionMap[event.type];
-    let message: string = `[whmcs-support] _${event.who}_ ${action} <${event.ticket.link}` +
+    let message: string = `[whmcs-support] ${formatName(event.who)} ${action} <${event.ticket.link}` +
                           `|ticket #${event.ticket.id} (${event.ticket.title})>`;
     if (event.type === "ReplyFromStaff") {
-      message += ` from client ${event.ticket.clientName}`;
+      message += ` from client _${event.ticket.clientName}_`;
     }
     try {
       await web.chat.postMessage(SUPPORT_CHANNEL, message, {
