@@ -314,6 +314,10 @@ events.listen(GHRawHookEvent.name, function rawEventConverter(evt: GHRawHookEven
       ));
       break;
 
+    case "ping":
+      events.dispatch(SOURCE, new events.InternalEvent("Received hook ping from GitHub"));
+      break;
+
     default: {
       const message = "Received unexpected event: " + evt.event;
       events.dispatch(SOURCE, new events.InternalEvent(message));
