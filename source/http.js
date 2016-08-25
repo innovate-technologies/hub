@@ -40,7 +40,7 @@ app.use(function (req, res, next) {
 
 // Status page
 app.get("/", (req, res) => {
-  if (!config.get("publicStatus.enabled")) {
+  if (!config.get("publicStatus.enabled") && !(req.ip === "127.0.0.1" || req.ip === "::1")) {
     throw new utils.AccessDeniedError();
   }
   res.set("Content-Type", "text/html");
