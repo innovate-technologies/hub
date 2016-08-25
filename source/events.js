@@ -49,7 +49,7 @@ export const listen = (eventType: string, listener: Function) => {
   eventEmitter.on(eventType, (...args) => {
     try {
       const ret = listener(...args);
-      if (ret.catch) {
+      if (ret && ret.catch) {
         ret.catch((error: Error) =>
                   log.error(error, "Error (async) while calling listener for " + eventType));
       }
