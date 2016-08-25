@@ -212,7 +212,7 @@ events.listen(github.GHPushEvent.name, async (evt: github.GHPushEvent) => {
 
 events.listen(github.GHPullRequestEvent.name, async (evt: github.GHPullRequestEvent) => {
   const action = evt.action === "synchronize" ? "synchronised" : evt.action;
-  const message = `[<${getRepoLink(evt.pr.repo)}|${evt.pr.repo}>] ${formatName(evt.pr.author)}`
+  const message = `[<${getRepoLink(evt.pr.repo)}|${evt.pr.repo}>] ${formatName(evt.who)}`
     + ` ${action} pull request <${evt.pr.url}|#${evt.pr.id}: ${evt.pr.title}>`
     + ` (${evt.pr.baseRefName}..${evt.pr.headRefName}`;
   const options = { "as_user": true, "unfurl_links": false, attachments: undefined };
@@ -230,7 +230,7 @@ events.listen(github.GHPullRequestEvent.name, async (evt: github.GHPullRequestEv
 events.listen(github.GHPullRequestReviewCommentEvent.name,
   async (evt: github.GHPullRequestReviewCommentEvent) => {
     const action = evt.action === "created" ? "commented" : `${evt.action} comment`;
-    const message = `[<${getRepoLink(evt.pr.repo)}|${evt.pr.repo}>] ${formatName(evt.commenter)}`
+    const message = `[<${getRepoLink(evt.pr.repo)}|${evt.pr.repo}>] ${formatName(evt.who)}`
       + ` <${evt.url}|${action}> on pull request <${evt.pr.url}|#${evt.pr.id}> (${evt.pr.title})`
       + ` ${formatHash(evt.commitId)}`;
     const options = { "as_user": true, "unfurl_links": false, attachments: undefined };
@@ -248,7 +248,7 @@ events.listen(github.GHPullRequestReviewCommentEvent.name,
 
 events.listen(github.GHCommitCommentEvent.name, async (evt: github.GHCommitCommentEvent) => {
   const action = evt.action === "created" ? "commented" : `${evt.action} comment`;
-  const message = `[<${getRepoLink(evt.repo)}|${evt.repo}>] ${formatName(evt.commenter)}`
+  const message = `[<${getRepoLink(evt.repo)}|${evt.repo}>] ${formatName(evt.who)}`
     + ` <${evt.url}|${action}> on commit <${evt.url}|${formatHash(evt.commitId)}>`;
   const options = { "as_user": true, "unfurl_links": false, attachments: undefined };
   if (evt.action === "created") {
@@ -263,7 +263,7 @@ events.listen(github.GHCommitCommentEvent.name, async (evt: github.GHCommitComme
 });
 
 events.listen(github.GHIssueEvent.name, async (evt: github.GHIssueEvent) => {
-  const message = `[<${getRepoLink(evt.issue.repo)}|${evt.issue.repo}>] ${formatName(evt.issue.author)}`
+  const message = `[<${getRepoLink(evt.issue.repo)}|${evt.issue.repo}>] ${formatName(evt.who)}`
     + ` ${evt.action} issue <${evt.issue.url}|#${evt.issue.id}: ${evt.issue.title}>`;
   const options = { "as_user": true, "unfurl_links": false, attachments: undefined };
   if (evt.action === "created") {
@@ -279,7 +279,7 @@ events.listen(github.GHIssueEvent.name, async (evt: github.GHIssueEvent) => {
 
 events.listen(github.GHIssueCommentEvent.name, async (evt: github.GHIssueCommentEvent) => {
   const action = evt.action === "created" ? "commented" : `${evt.action} comment`;
-  const message = `[<${getRepoLink(evt.issue.repo)}|${evt.issue.repo}>] ${formatName(evt.author)}`
+  const message = `[<${getRepoLink(evt.issue.repo)}|${evt.issue.repo}>] ${formatName(evt.who)}`
     + ` <${evt.url}|${action}> on <${evt.issue.url}|#${evt.issue.id}: ${evt.issue.title}>`;
   const options = { "as_user": true, "unfurl_links": false, attachments: undefined };
   if (evt.action === "created") {

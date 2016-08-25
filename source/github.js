@@ -213,51 +213,52 @@ export class GHPushEvent extends events.Event {
 }
 
 export class GHPullRequestEvent extends events.Event {
-  pr: GHPullRequest; action: string;
+  pr: GHPullRequest; action: string; who: string;
 
-  constructor(pr: GHPullRequest, action: string) {
+  constructor(pr: GHPullRequest, action: string, who: string) {
     super();
-    Object.assign(this, { pr, action });
+    Object.assign(this, { pr, action, who });
   }
 }
 
 export class GHPullRequestReviewCommentEvent extends events.Event {
   pr: GHPullRequest; commenter: string; commitId: string; body: string;
-  action: string; url: string;
+  action: string; who: string; url: string;
 
   constructor(pr: GHPullRequest, commenter: string, commitId: string, body: string,
-              action: string, url: string) {
+              action: string, who: string, url: string) {
     super();
-    Object.assign(this, { pr, commenter, commitId, body, action, url });
+    Object.assign(this, { pr, commenter, commitId, body, action, who, url });
   }
 }
 
 export class GHCommitCommentEvent extends events.Event {
-  repo: string; commenter: string; commitId: string; body: string; action: string; url: string;
+  repo: string; commenter: string; commitId: string; body: string;
+  action: string; who: string; url: string;
 
   constructor(repo: string, commenter: string, commitId: string, body: string,
-              action: string, url: string) {
+              action: string, who: string, url: string) {
     super();
-    Object.assign(this, { repo, commenter, commitId, body, action, url });
+    Object.assign(this, { repo, commenter, commitId, body, action, who, url });
   }
 }
 
 export class GHIssueEvent extends events.Event {
-  issue: GHIssue; action: string;
+  issue: GHIssue; action: string; who: string;
 
-  constructor(issue: GHIssue, action: string) {
+  constructor(issue: GHIssue, action: string, who: string) {
     super();
-    Object.assign(this, { issue, action });
+    Object.assign(this, { issue, action, who });
   }
 }
 
 export class GHIssueCommentEvent extends events.Event {
-  issue: GHIssue; author: string; body: string; action: string; url: string;
+  issue: GHIssue; author: string; body: string; action: string; who: string; url: string;
   isFromTrustedAuthor: bool;
 
-  constructor(issue: GHIssue, author: string, body: string, action: string, url: string) {
+  constructor(issue: GHIssue, author: string, body: string, action: string, who: string, url: string) {
     super();
-    Object.assign(this, { issue, author, body, action, url });
+    Object.assign(this, { issue, author, body, action, who, url });
     this.isFromTrustedAuthor = trustedUsers.has(this.author);
   }
 }
@@ -280,34 +281,36 @@ events.listen(GHRawHookEvent.name, function rawEventConverter(evt: GHRawHookEven
 
     case "pull_request":
       events.dispatch(SOURCE, new GHPullRequestEvent(
-        new GHPullRequest(data.repository.full_name, data.pull_request), data.action
+        new GHPullRequest(data.repository.full_name, data.pull_request), data.action, data.sender.login
       ));
       break;
 
     case "pull_request_review_comment":
       events.dispatch(SOURCE, new GHPullRequestReviewCommentEvent(
         new GHPullRequest(data.repository.full_name, data.pull_request),
-        data.sender.login, data.comment.commit_id, data.body, data.action, data.commit.html_url
+        data.comment.user.login, data.comment.commit_id, data.body,
+        data.action, data.sender.login, data.commit.html_url
       ));
       break;
 
     case "commit_comment":
       events.dispatch(SOURCE, new GHCommitCommentEvent(
         data.repository.full_name, data.comment.user.login, data.comment.commit_id,
-        data.comment.body, data.action, data.comment.html_url
+        data.comment.body, data.action, data.sender.login, data.comment.html_url
       ));
       break;
 
     case "issues":
       events.dispatch(SOURCE, new GHIssueEvent(
-        new GHIssue(data.repository.full_name, data.issue), data.action
+        new GHIssue(data.repository.full_name, data.issue), data.action, data.sender.login
       ));
       break;
 
     case "issue_comment":
       events.dispatch(SOURCE, new GHIssueCommentEvent(
         new GHIssue(data.repository.full_name, data.issue),
-        data.comment.user.login, data.comment.body, data.action, data.comment.html_url
+        data.comment.user.login, data.comment.body,
+        data.action, data.sender.login, data.comment.html_url
       ));
       break;
 
