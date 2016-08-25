@@ -45,6 +45,16 @@ export const dispatch = (source: string, event: Event) => {
   eventEmitter.emit(eventType, event);
 };
 
-export const listen = (eventType: string, callback: Function) => {
-  eventEmitter.on(eventType, callback);
+export const listen = (eventType: string, listener: Function) => {
+  eventEmitter.on(eventType, (...args) => {
+    try {
+      const ret = listener(...args);
+      if (ret.catch) {
+        ret.catch((error: Error) =>
+                  log.error(error, "Error (async) while calling listener for " + eventType));
+      }
+    } catch (error) {
+      log.error(error, "Error while calling listener for " + eventType);
+    }
+  });
 };
