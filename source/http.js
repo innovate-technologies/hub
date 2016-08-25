@@ -6,18 +6,20 @@ import http from "http";
 import util from "util";
 
 import bodyParser from "body-parser";
+import bufferEq from "buffer-equal-constant-time";
 import config from "config";
+import crypto from "crypto";
 import express from "express";
 import { Html5Entities as Entities } from "html-entities";
 import * as _ from "lodash";
 
 import * as events from "app/events.js";
+import * as github from "app/github.js";
 import log from "app/logs.js";
 import * as utils from "app/utils.js";
 import * as whmcs from "app/whmcs.js";
 
 const entities = new Entities();
-
 // Used in route handlers to catch async exceptions as if they were synchronous.
 // const wrapAsync = fn => (...args) => fn(...args).catch(args[2]);
 
@@ -58,6 +60,30 @@ app.get("/", (req, res) => {
   }
   res.write("<style>body { font-family: Roboto, serif; }</style></body></html>");
   res.send();
+});
+
+// GitHub
+const GH_HOOK_SECRET: string = config.get("github.hookSecret");
+
+function signBlob(secret: string, blob: string): string {
+  return "sha1=" + crypto.createHmac("sha1", secret).update(blob).digest("hex");
+}
+function verifySignature(secret: string, blob: string, signature: string): bool {
+  return bufferEq(new Buffer(signature), new Buffer(signBlob(secret, blob)));
+}
+
+app.post("/github", (req, res) => {
+  if (!req.headers["x-hub-signature"]) {
+    throw new utils.AccessDeniedError("No signature");
+  }
+  if (!req.headers["x-github-event"] || !req.headers["x-github-delivery"]) {
+    throw new Error("No event or delivery ID");
+  }
+  if (!verifySignature(GH_HOOK_SECRET, JSON.stringify(req.body), req.headers["x-hub-signature"])) {
+    throw new utils.AccessDeniedError("Signature does not match");
+  }
+  events.dispatch("http", new github.GHRawHookEvent(req.headers["x-github-event"], req.body));
+  res.status(204).send();
 });
 
 // WHMCS

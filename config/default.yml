@@ -1,9 +1,22 @@
 ---
 port: 3000
-
+publicUrl: https://hub.innovatete.ch
 publicStatus:
   # Whether recent events should be shown publicly. Can include sensitive information.
   enabled: false
+
+github:
+  organisation: innovate-technologies
+  auth:
+    username: innovate-bot
+    token: xxx
+  hookSecret: xxx
+
+  notify:
+    - innovate-technologies/hub
+
+  trustedUsers:
+    group: innovate-technologies/trusted-developers
 
 slack:
   token: "xxx"
