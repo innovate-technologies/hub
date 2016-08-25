@@ -192,7 +192,8 @@ events.listen(github.GHPushEvent.name, async (evt: github.GHPushEvent) => {
   let attachmentText: string = "";
   for (const commit of commits) {
     attachmentText += util.format("`<%s|%s>` by %s [%d|%d|%d] %s\n",
-                                  commit.url, commit.id.substring(0, 7), commit.author.name,
+                                  commit.url, commit.id.substring(0, 7),
+                                  formatName(commit.author.name),
                                   commit.added.length, commit.modified.length, commit.removed.length,
                                   commit.message.split("\n")[0]);
   }
