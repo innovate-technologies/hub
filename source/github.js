@@ -76,6 +76,7 @@ const WEBHOOK_REPO_EVENTS = [
   "pull_request",
   "pull_request_review_comment",
   "commit_comment",
+  "issues",
   "issue_comment",
 ];
 const WEBHOOK_ORG_EVENTS = [
@@ -241,6 +242,15 @@ export class GHCommitCommentEvent extends events.Event {
   }
 }
 
+export class GHIssueEvent extends events.Event {
+  issue: GHIssue; action: string;
+
+  constructor(issue: GHIssue, action: string) {
+    super();
+    Object.assign(this, { issue, action });
+  }
+}
+
 export class GHIssueCommentEvent extends events.Event {
   issue: GHIssue; author: string; body: string; action: string; url: string;
   isFromTrustedAuthor: bool;
@@ -285,6 +295,12 @@ events.listen(GHRawHookEvent.name, function rawEventConverter(evt: GHRawHookEven
       events.dispatch(SOURCE, new GHCommitCommentEvent(
         data.repository.full_name, data.comment.user.login, data.comment.commit_id,
         data.comment.body, data.action, data.comment.html_url
+      ));
+      break;
+
+    case "issues":
+      events.dispatch(SOURCE, new GHIssueEvent(
+        new GHIssue(data.repository.full_name, data.issue), data.action
       ));
       break;
 

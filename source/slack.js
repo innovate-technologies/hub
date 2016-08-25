@@ -261,6 +261,21 @@ events.listen(github.GHCommitCommentEvent.name, async (evt: github.GHCommitComme
   });
 });
 
+events.listen(github.GHIssueEvent.name, async (evt: github.GHIssueEvent) => {
+  const message = `[<${getRepoLink(evt.issue.repo)}|${evt.issue.repo}>] ${formatName(evt.issue.author)}`
+    + ` ${evt.action} issue <${evt.issue.url}|#${evt.issue.id}: ${evt.issue.title}>`;
+  await web.chat.postMessage(DEV_CHANNEL, message, {
+    attachments: [{
+      color: "#FF5722",
+      fallback: evt.issue.body,
+      text: evt.issue.body,
+      "mrkdwn_in": ["text"],
+    }],
+    "as_user": true,
+    "unfurl_links": false,
+  });
+});
+
 events.listen(github.GHIssueCommentEvent.name, async (evt: github.GHIssueCommentEvent) => {
   const action = evt.action === "created" ? "commented" : `${evt.action} comment`;
   const message = `[<${getRepoLink(evt.issue.repo)}|${evt.issue.repo}>] ${formatName(evt.author)}`
