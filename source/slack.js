@@ -214,7 +214,7 @@ events.listen(github.GHPullRequestEvent.name, async (evt: github.GHPullRequestEv
   const action = evt.action === "synchronize" ? "synchronised" : evt.action;
   const message = `[<${getRepoLink(evt.pr.repo)}|${evt.pr.repo}>] ${formatName(evt.who)}`
     + ` ${action} pull request <${evt.pr.url}|#${evt.pr.id}: ${evt.pr.title}>`
-    + ` (${evt.pr.baseRefName}..${evt.pr.headRefName}`;
+    + ` (${evt.pr.baseRefName}..${evt.pr.headRefName})`;
   const options = { "as_user": true, "unfurl_links": false, attachments: undefined };
   if (evt.action === "created") {
     options.attachments = [{
