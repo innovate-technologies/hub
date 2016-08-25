@@ -216,7 +216,7 @@ events.listen(github.GHPullRequestEvent.name, async (evt: github.GHPullRequestEv
     + ` ${action} pull request <${evt.pr.url}|#${evt.pr.id}: ${evt.pr.title}>`
     + ` (${evt.pr.baseRefName}..${evt.pr.headRefName})`;
   const options = { "as_user": true, "unfurl_links": false, attachments: undefined };
-  if (evt.action === "created") {
+  if (evt.action === "created" || evt.action === "opened") {
     options.attachments = [{
       color: "#1565C0",
       fallback: evt.pr.body,
@@ -266,7 +266,7 @@ events.listen(github.GHIssueEvent.name, async (evt: github.GHIssueEvent) => {
   const message = `[<${getRepoLink(evt.issue.repo)}|${evt.issue.repo}>] ${formatName(evt.who)}`
     + ` ${evt.action} issue <${evt.issue.url}|#${evt.issue.id}: ${evt.issue.title}>`;
   const options = { "as_user": true, "unfurl_links": false, attachments: undefined };
-  if (evt.action === "created") {
+  if (evt.action === "created" || evt.action === "opened") {
     options.attachments = [{
       color: "#FF5722",
       fallback: evt.issue.body,
