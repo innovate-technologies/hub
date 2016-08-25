@@ -26,6 +26,7 @@ slack:
   # Channels where notifications will be sent.
   notify:
     support: support
+    dev: dev
   # Trusted people that can use bot commands.
   trustedPeople: []
 

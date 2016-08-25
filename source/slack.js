@@ -7,7 +7,9 @@ import { Html5Entities as Entities } from "html-entities";
 import { CLIENT_EVENTS, RTM_EVENTS, MemoryDataStore, RtmClient, WebClient } from "@slack/client";
 
 import * as events from "app/events.js";
+import * as github from "app/github.js";
 import log from "app/logs.js";
+import util from "util";
 import * as whmcs from "app/whmcs.js";
 
 const entities = new Entities();
@@ -156,3 +158,116 @@ events.listen(whmcs.WHMCSTicketStatusChangeEvent.name, async (event: whmcs.WHMCS
     });
   });
 }
+
+// GitHub notifications
+
+const DEV_CHANNEL = config.get("slack.notify.dev");
+const getRepoLink = (repo: string) => "https://github.com/" + repo;
+const formatHash = (hash: string) => "`" + hash.substring(0, 7) + "`";
+events.listen(github.GHPushEvent.name, async (evt: github.GHPushEvent) => {
+  const repoLink = getRepoLink(evt.repo);
+  const commits = evt.commits.filter((commit) => commit.distinct);
+
+  let message = `[<${repoLink}|${evt.repo}>] ${formatName(evt.pusher)}`;
+  if (evt.created) {
+    if (evt.refType === "tags") {
+      message += ` tagged ${evt.baseRefName || formatHash(evt.afterSha)} as ${evt.refName}`;
+    } else {
+      message += ` pushed new branch ${evt.refName}`;
+    }
+  } else if (evt.deleted) {
+    message += ` deleted ${evt.refName} (was at ${formatHash(evt.beforeSha)})`;
+  } else if (evt.forced) {
+    message += ` force-pushed ${evt.refName} from ${formatHash(evt.beforeSha)} to ${formatHash(evt.afterSha)}`;
+  } else if (evt.commits.length && !commits.length) {
+    if (evt.baseRefName) {
+      message += ` merged ${evt.baseRefName} into ${evt.refName}`;
+    } else {
+      message += ` fast-forwarded ${evt.refName} from ${formatHash(evt.beforeSha)} to ${formatHash(evt.afterSha)}`;
+    }
+  } else {
+    message += ` pushed ${commits.length} commit${commits.length === 1 ? "" : "s"} to ${evt.refName}`;
+  }
+
+  let attachmentText: string = "";
+  for (const commit of commits) {
+    attachmentText += util.format("`<%s|%s>` by %s [%d|%d|%d] %s\n", commit.url, commit.id,
+                                  commit.author.name,
+                                  commit.added.length, commit.modified.length, commit.removed.length,
+                                  commit.message.split("\n")[0]);
+  }
+
+  await web.chat.postMessage(DEV_CHANNEL, message, {
+    attachments: [{
+      color: "#283593",
+      fallback: attachmentText,
+      text: attachmentText,
+      "mrkdwn_in": ["text"],
+    }],
+    "as_user": true,
+  });
+});
+
+events.listen(github.GHPullRequestEvent.name, async (evt: github.GHPullRequestEvent) => {
+  const action = evt.action === "synchronize" ? "synchronised" : evt.action;
+  const message = `[<${getRepoLink(evt.pr.repo)}|${evt.pr.repo}>] ${formatName(evt.pr.author)}`
+    + ` ${action} pull request <${evt.pr.url}|#${evt.pr.id}: ${evt.pr.title}>`
+    + ` (${evt.pr.baseRefName}..${evt.pr.headRefName}`;
+  await web.chat.postMessage(DEV_CHANNEL, message, {
+    attachments: [{
+      color: "#1565C0",
+      fallback: evt.pr.body,
+      text: evt.pr.body,
+      "mrkdwn_in": ["text"],
+    }],
+    "as_user": true,
+  });
+});
+
+events.listen(github.GHPullRequestReviewCommentEvent.name,
+  async (evt: github.GHPullRequestReviewCommentEvent) => {
+    const action = evt.action === "created" ? "commented" : `${evt.action} comment`;
+    const message = `[<${getRepoLink(evt.pr.repo)}|${evt.pr.repo}>] ${formatName(evt.commenter)}`
+      + ` <${evt.url}|${action}> on pull request <${evt.pr.url}|#${evt.pr.id}> (${evt.pr.title})`
+      + ` ${formatHash(evt.commitId)}`;
+    await web.chat.postMessage(DEV_CHANNEL, message, {
+      attachments: [{
+        color: "#1565C0",
+        fallback: evt.body,
+        text: evt.body,
+        "mrkdwn_in": ["text"],
+      }],
+      "as_user": true,
+    });
+  }
+);
+
+events.listen(github.GHCommitCommentEvent.name, async (evt: github.GHCommitCommentEvent) => {
+  const action = evt.action === "created" ? "commented" : `${evt.action} comment`;
+  const message = `[<${getRepoLink(evt.repo)}|${evt.repo}>] ${formatName(evt.commenter)}`
+    + ` <${evt.url}|${action}> on commit <${evt.url}|${formatHash(evt.commitId)}>`;
+  await web.chat.postMessage(DEV_CHANNEL, message, {
+    attachments: [{
+      color: "#039BE5",
+      fallback: evt.body,
+      text: evt.body,
+      "mrkdwn_in": ["text"],
+    }],
+    "as_user": true,
+  });
+});
+
+events.listen(github.GHIssueCommentEvent.name, async (evt: github.GHIssueCommentEvent) => {
+  const action = evt.action === "created" ? "commented" : `${evt.action} comment`;
+  const message = `[<${getRepoLink(evt.issue.repo)}|${evt.issue.repo}>] ${formatName(evt.author)}`
+    + ` <${evt.url}|${action}> on <${evt.issue.url}|#${evt.issue.id}: ${evt.issue.title}>`;
+  await web.chat.postMessage(DEV_CHANNEL, message, {
+    attachments: [{
+      color: "#1565C0",
+      fallback: evt.body,
+      text: evt.body,
+      "mrkdwn_in": ["text"],
+    }],
+    "as_user": true,
+  });
+});

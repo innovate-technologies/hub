@@ -140,10 +140,10 @@ installHookForRepos();
 type Author = { name: string, email: string };
 class GHCommit {
   id: string; url: string; author: Author; message: string;
-  distinct: bool; added: number; modified: number; removed: number;
+  distinct: bool; added: Array<string>; modified: Array<string>; removed: Array<string>;
 
   constructor(id: string, url: string, author: Author, message: string,
-              added: number, modified: number, removed: number) {
+              added: Array<string>, modified: Array<string>, removed: Array<string>) {
     Object.assign(this, { id, url, author, message, added, modified, removed });
   }
 }
@@ -198,14 +198,15 @@ export class GHMembershipEvent extends events.Event {
 
 export class GHPushEvent extends events.Event {
   repo: string; pusher: string; commits: Array<GHCommit>;
-  beforeSha: string; afterSha: string; baseRefName: string; refName: string;
+  beforeSha: string; afterSha: string; baseRefName: ?string; refType: string; refName: string;
   created: bool; deleted: bool; forced: bool;
 
   constructor(repo: string, pusher: string, commits: Array<GHCommit>,
-              beforeSha: string, afterSha: string, baseRefName: string, refName: string,
+              beforeSha: string, afterSha: string, baseRefName: ?string, ref: string,
               created: bool, deleted: bool, forced: bool) {
     super();
-    Object.assign(this, { repo, pusher, commits, beforeSha, afterSha, baseRefName, refName,
+    const [, refType, refName] = ref.split("/");
+    Object.assign(this, { repo, pusher, commits, beforeSha, afterSha, baseRefName, refType, refName,
                           created, deleted, forced });
   }
 }
@@ -231,12 +232,12 @@ export class GHPullRequestReviewCommentEvent extends events.Event {
 }
 
 export class GHCommitCommentEvent extends events.Event {
-  repo: string; author: string; commitId: string; body: string; action: string; url: string;
+  repo: string; commenter: string; commitId: string; body: string; action: string; url: string;
 
-  constructor(repo: string, author: string, commitId: string, body: string,
+  constructor(repo: string, commenter: string, commitId: string, body: string,
               action: string, url: string) {
     super();
-    Object.assign(this, { repo, author, commitId, body, action, url });
+    Object.assign(this, { repo, commenter, commitId, body, action, url });
   }
 }
 
@@ -263,8 +264,7 @@ events.listen(GHRawHookEvent.name, function rawEventConverter(evt: GHRawHookEven
     case "push":
       events.dispatch(SOURCE, new GHPushEvent(data.repository.full_name, data.pusher.name,
                                               data.commits, data.before, data.after,
-                                              (data.base_ref || "").split("/")[2],
-                                              data.ref.split("/")[2],
+                                              (data.base_ref || "").split("/")[2], data.ref,
                                               data.created, data.deleted, data.forced));
       break;
 
