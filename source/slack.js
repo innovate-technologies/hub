@@ -205,6 +205,7 @@ events.listen(github.GHPushEvent.name, async (evt: github.GHPushEvent) => {
       "mrkdwn_in": ["text"],
     }],
     "as_user": true,
+    "unfurl_links": false,
   });
 });
 
@@ -221,6 +222,7 @@ events.listen(github.GHPullRequestEvent.name, async (evt: github.GHPullRequestEv
       "mrkdwn_in": ["text"],
     }],
     "as_user": true,
+    "unfurl_links": false,
   });
 });
 
@@ -238,6 +240,7 @@ events.listen(github.GHPullRequestReviewCommentEvent.name,
         "mrkdwn_in": ["text"],
       }],
       "as_user": true,
+      "unfurl_links": false,
     });
   }
 );
@@ -254,6 +257,7 @@ events.listen(github.GHCommitCommentEvent.name, async (evt: github.GHCommitComme
       "mrkdwn_in": ["text"],
     }],
     "as_user": true,
+    "unfurl_links": false,
   });
 });
 
@@ -269,5 +273,6 @@ events.listen(github.GHIssueCommentEvent.name, async (evt: github.GHIssueComment
       "mrkdwn_in": ["text"],
     }],
     "as_user": true,
+    "unfurl_links": false,
   });
 });
