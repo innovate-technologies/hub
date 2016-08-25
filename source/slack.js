@@ -214,16 +214,16 @@ events.listen(github.GHPullRequestEvent.name, async (evt: github.GHPullRequestEv
   const message = `[<${getRepoLink(evt.pr.repo)}|${evt.pr.repo}>] ${formatName(evt.pr.author)}`
     + ` ${action} pull request <${evt.pr.url}|#${evt.pr.id}: ${evt.pr.title}>`
     + ` (${evt.pr.baseRefName}..${evt.pr.headRefName}`;
-  await web.chat.postMessage(DEV_CHANNEL, message, {
-    attachments: [{
+  const options = { "as_user": true, "unfurl_links": false, attachments: undefined };
+  if (evt.action === "created") {
+    options.attachments = [{
       color: "#1565C0",
       fallback: evt.pr.body,
       text: evt.pr.body,
       "mrkdwn_in": ["text"],
-    }],
-    "as_user": true,
-    "unfurl_links": false,
-  });
+    }];
+  }
+  await web.chat.postMessage(DEV_CHANNEL, message, options);
 });
 
 events.listen(github.GHPullRequestReviewCommentEvent.name,
@@ -232,16 +232,16 @@ events.listen(github.GHPullRequestReviewCommentEvent.name,
     const message = `[<${getRepoLink(evt.pr.repo)}|${evt.pr.repo}>] ${formatName(evt.commenter)}`
       + ` <${evt.url}|${action}> on pull request <${evt.pr.url}|#${evt.pr.id}> (${evt.pr.title})`
       + ` ${formatHash(evt.commitId)}`;
-    await web.chat.postMessage(DEV_CHANNEL, message, {
-      attachments: [{
+    const options = { "as_user": true, "unfurl_links": false, attachments: undefined };
+    if (evt.action === "created") {
+      options.attachments = [{
         color: "#1565C0",
         fallback: evt.body,
         text: evt.body,
         "mrkdwn_in": ["text"],
-      }],
-      "as_user": true,
-      "unfurl_links": false,
-    });
+      }];
+    }
+    await web.chat.postMessage(DEV_CHANNEL, message, options);
   }
 );
 
@@ -249,45 +249,45 @@ events.listen(github.GHCommitCommentEvent.name, async (evt: github.GHCommitComme
   const action = evt.action === "created" ? "commented" : `${evt.action} comment`;
   const message = `[<${getRepoLink(evt.repo)}|${evt.repo}>] ${formatName(evt.commenter)}`
     + ` <${evt.url}|${action}> on commit <${evt.url}|${formatHash(evt.commitId)}>`;
-  await web.chat.postMessage(DEV_CHANNEL, message, {
-    attachments: [{
+  const options = { "as_user": true, "unfurl_links": false, attachments: undefined };
+  if (evt.action === "created") {
+    options.attachments = [{
       color: "#039BE5",
       fallback: evt.body,
       text: evt.body,
       "mrkdwn_in": ["text"],
-    }],
-    "as_user": true,
-    "unfurl_links": false,
-  });
+    }];
+  }
+  await web.chat.postMessage(DEV_CHANNEL, message, options);
 });
 
 events.listen(github.GHIssueEvent.name, async (evt: github.GHIssueEvent) => {
   const message = `[<${getRepoLink(evt.issue.repo)}|${evt.issue.repo}>] ${formatName(evt.issue.author)}`
     + ` ${evt.action} issue <${evt.issue.url}|#${evt.issue.id}: ${evt.issue.title}>`;
-  await web.chat.postMessage(DEV_CHANNEL, message, {
-    attachments: [{
+  const options = { "as_user": true, "unfurl_links": false, attachments: undefined };
+  if (evt.action === "created") {
+    options.attachments = [{
       color: "#FF5722",
       fallback: evt.issue.body,
       text: evt.issue.body,
       "mrkdwn_in": ["text"],
-    }],
-    "as_user": true,
-    "unfurl_links": false,
-  });
+    }];
+  }
+  await web.chat.postMessage(DEV_CHANNEL, message, options);
 });
 
 events.listen(github.GHIssueCommentEvent.name, async (evt: github.GHIssueCommentEvent) => {
   const action = evt.action === "created" ? "commented" : `${evt.action} comment`;
   const message = `[<${getRepoLink(evt.issue.repo)}|${evt.issue.repo}>] ${formatName(evt.author)}`
     + ` <${evt.url}|${action}> on <${evt.issue.url}|#${evt.issue.id}: ${evt.issue.title}>`;
-  await web.chat.postMessage(DEV_CHANNEL, message, {
-    attachments: [{
+  const options = { "as_user": true, "unfurl_links": false, attachments: undefined };
+  if (evt.action === "created") {
+    options.attachments = [{
       color: "#1565C0",
       fallback: evt.body,
       text: evt.body,
       "mrkdwn_in": ["text"],
-    }],
-    "as_user": true,
-    "unfurl_links": false,
-  });
+    }];
+  }
+  await web.chat.postMessage(DEV_CHANNEL, message, options);
 });
