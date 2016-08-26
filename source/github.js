@@ -289,7 +289,7 @@ events.listen(GHRawHookEvent.name, function rawEventConverter(evt: GHRawHookEven
       events.dispatch(SOURCE, new GHPullRequestReviewCommentEvent(
         new GHPullRequest(data.repository.full_name, data.pull_request),
         data.comment.user.login, data.comment.commit_id, data.body,
-        data.action, data.sender.login, data.html_url
+        data.action, data.sender.login, data.comment.html_url
       ));
       break;
 
