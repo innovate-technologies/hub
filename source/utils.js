@@ -20,7 +20,7 @@ export const exec = (binary: string, args: Array<string>, options: Object = {}) 
 };
 
 export const escapeShell = (command: string) => {
-  return '"' + command.replace(/(["'$`\\])/g, "\\$1") + '"';
+  return '"' + command.replace(/([\s"'$`\\])/g, "\\$1") + '"';
 };
 
 export const objectToString = (...args: any): string => {
