@@ -5,8 +5,11 @@
 import { execFile } from "child_process";
 import util from "util";
 
-export const exec = (binary: string, args: Array<string>, options: Object = {}) =>
-  new Promise((resolve: Function, reject: Function) => {
+import * as events from "app/events.js";
+
+export const exec = (binary: string, args: Array<string>, options: Object = {}) => {
+  events.dispatch("utils/exec", new events.InternalEvent("exec called", { binary, args }));
+  return new Promise((resolve: Function, reject: Function) => {
     execFile(binary, args, options, (err: ?Error, stdout: Buffer) => {
       if (err) {
         return reject(err);
@@ -14,6 +17,7 @@ export const exec = (binary: string, args: Array<string>, options: Object = {}) 
       resolve(stdout);
     });
   });
+};
 
 export const escapeShell = (command: string) => {
   return '"' + command.replace(/(["'$`\\])/g, "\\$1") + '"';
