@@ -6,6 +6,7 @@ import config from "config";
 import { Html5Entities as Entities } from "html-entities";
 import { CLIENT_EVENTS, RTM_EVENTS, MemoryDataStore, RtmClient, WebClient } from "@slack/client";
 
+import { BuildEvent } from "app/build-events.js";
 import * as events from "app/events.js";
 import * as github from "app/github.js";
 import log from "app/logs.js";
@@ -14,13 +15,16 @@ import * as whmcs from "app/whmcs.js";
 
 const entities = new Entities();
 
+const TRUSTED_PEOPLE: Array<string> = config.get("slack.trustedPeople");
+
 export class SlackMessageEvent extends events.Event {
-  from: string; channel: string; message: string; isDirect: bool;
+  from: string; channel: string; message: string; isDirect: bool; trusted: bool;
 
   constructor(from: string, channel: string, message: string, isDirect: bool) {
     super();
     Object.assign(this, { from, channel, message, isDirect });
     this.message = entities.decode(this.message);
+    this.trusted = TRUSTED_PEOPLE.includes(this.from);
   }
 }
 
@@ -290,5 +294,30 @@ events.listen(github.GHIssueCommentEvent.name, async (evt: github.GHIssueComment
       "mrkdwn_in": ["text"],
     }];
   }
+  await web.chat.postMessage(DEV_CHANNEL, message, options);
+});
+
+
+// Build events
+const BUILD_STATUSES = {
+  success: "succeeded :white_check_mark:",
+  failure: "failed :red_circle:",
+};
+events.listen(BuildEvent.name, async (evt: BuildEvent) => {
+  if (evt.state === "pending") {
+    return;
+  }
+  if (evt.builder === "hub" && evt.state === "success") {
+    return;
+  }
+
+  const status = BUILD_STATUSES[evt.state] || "???";
+  let message = `[<${getRepoLink(evt.repo)}|${evt.repo}>] build for <${evt.prUrl}|#${evt.pr}> `
+    + `${status} on builder <${evt.url}|${evt.builder}>`;
+  if (evt.builder === "hub") {
+    message = `[<${getRepoLink(evt.repo)}|${evt.repo}>] build for <${evt.prUrl}|#${evt.pr}> aborted`
+      + ` :red_circle: - ${evt.description}`;
+  }
+  const options = { "as_user": true, "unfurl_links": false };
   await web.chat.postMessage(DEV_CHANNEL, message, options);
 });

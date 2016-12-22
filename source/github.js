@@ -3,6 +3,7 @@
 // @flow
 
 import config from "config";
+import { BuildEvent } from "app/build-events.js";
 import * as events from "app/events.js";
 import fetch from "node-fetch";
 import log from "app/logs.js";
@@ -10,7 +11,7 @@ import { parse as parseUrl, format as formatUrl } from "url";
 
 const API_ENDPOINT = "https://api.github.com";
 type MethodType = | "GET" | "POST" | "PATCH" | "DELETE";
-const request = async (url: string, body: ?Object, method: ?MethodType): Promise<*> => {
+export const request = async (url: string, body: ?Object, method: ?MethodType): Promise<*> => {
   const res = await fetch(url, { method, body: JSON.stringify(body), headers: {
     "Accept": "application/json",
     "Content-Type": "application/json",
@@ -19,7 +20,7 @@ const request = async (url: string, body: ?Object, method: ?MethodType): Promise
                                            config.get("github.auth.token")).toString("base64"),
   } });
   if (!res.ok) {
-    log.error({ status: res.status, body: await res.json() }, "res.ok = false");
+    log.error({ status: res.status, body: await res.json(), url, method }, "res.ok = false");
     throw new Error("res.ok = false");
   }
   return res;
@@ -208,7 +209,7 @@ export class GHPushEvent extends events.Event {
     super();
     const [, refType, refName] = ref.split("/");
     Object.assign(this, { repo, pusher, commits, beforeSha, afterSha, baseRefName, refType, refName,
-                          created, deleted, forced });
+      created, deleted, forced });
   }
 }
 
@@ -340,4 +341,15 @@ events.listen(GHMembershipEvent.name, (evt: GHMembershipEvent) => {
   } else {
     log.error(evt, "GHMembershipEvent: Unexpected action");
   }
+});
+
+events.listen(BuildEvent.name, async (evt: BuildEvent) => {
+  const data = {
+    context: evt.builder,
+    description: evt.description,
+    state: evt.state,
+    "target_url": evt.url,
+  };
+  await request("https://api.github.com/repos/" + evt.repo + "/statuses/" + evt.revision, data,
+                "POST");
 });

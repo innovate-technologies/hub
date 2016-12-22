@@ -32,3 +32,11 @@ slack:
 
 whmcs:
   token: "xxx"
+
+buildbot:
+  token: "xxx"
+  sshDest: hub@buildbot.innovatete.ch
+  # without trailing slash
+  jobdir: /srv/buildbot-pr-jobdir
+  buildbotBin: /home/buildbot/bb-master/bin/buildbot
+

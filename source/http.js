@@ -13,6 +13,7 @@ import express from "express";
 import { Html5Entities as Entities } from "html-entities";
 import * as _ from "lodash";
 
+import * as buildbot from "app/buildbot.js";
 import * as events from "app/events.js";
 import * as github from "app/github.js";
 import log from "app/logs.js";
@@ -61,6 +62,15 @@ app.get("/", (req, res) => {
   res.write("<style>body { font-family: Roboto, serif; }</style></body></html>");
   res.send();
 });
+
+// Buildbot
+const BB_HOOK_TOKEN: string = config.get("buildbot.token");
+app.post("/buildbot/" + BB_HOOK_TOKEN, (req, res) => {
+  events.dispatch("http", new buildbot.BBRawHookEvent(req.body));
+  res.status(204).send();
+});
+
+// BBRawHookEvent
 
 // GitHub
 const GH_HOOK_SECRET: string = config.get("github.hookSecret");

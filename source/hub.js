@@ -14,6 +14,7 @@ log.info("Starting Hub");
 // Initialise the web server
 require("app/http.js");
 
+require("app/buildbot.js");
 require("app/commands.js");
 require("app/github.js");
 require("app/slack.js");
