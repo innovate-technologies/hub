@@ -79,7 +79,7 @@ async function buildPullRequest(who: string, trusted: bool, repo: string, prNumb
     return;
   }
 
-  if (!pr.mergeable) {
+  if (pr.mergeable === false) {
     events.dispatch("builder", new BuildEvent("", "hub", repo, headSha, prNumber, "failure",
                     "PR not built (not mergeable)"));
     return;
