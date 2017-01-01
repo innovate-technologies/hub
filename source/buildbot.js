@@ -144,9 +144,8 @@ events.listen(slack.SlackMessageEvent.name, async (evt: slack.SlackMessageEvent)
   events.dispatch("internal", new events.InternalEvent("Rebuilding " + repoName + " PR " + prNumber
                                                        + " (via Slack)"));
   try {
-    await slack.sendMessage(evt.channel, "Hang on…");
-    await buildPullRequest(evt.from, true, "innovate-technologies/" + repoName, prNumber);
     await slack.sendMessage(evt.channel, ":gear: :gear: :gear:");
+    await buildPullRequest(evt.from, true, "innovate-technologies/" + repoName, prNumber);
   } catch (error) {
     await slack.sendMessage(evt.channel, ":warning: I couldn't do that: " + error.message);
   }
