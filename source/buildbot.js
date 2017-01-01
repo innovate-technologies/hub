@@ -9,7 +9,7 @@ import config from "config";
 import fetch from "node-fetch";
 import uuid4 from "uuid/v4";
 
-import { BuildEvent } from "app/build-events.js";
+import { BuildEvent, ReleaseBuildEvent } from "app/build-events.js";
 import type { BuildEventState } from "app/build-events.js";
 import * as events from "app/events.js";
 import * as github from "app/github.js";
@@ -103,7 +103,7 @@ const BUILDBOT_RESULTS_INT_MAP: [{state: BuildEventState, description: string}] 
   { state: "failure", description: "Build failed" }, // 2
 ];
 events.listen(BBRawHookEvent.name, (evt: BBRawHookEvent) => {
-  if (!evt.data.properties.pr_number || !evt.data.properties.repository) {
+  if (!evt.data.properties.repository) {
     return;
   }
 
@@ -115,6 +115,18 @@ events.listen(BBRawHookEvent.name, (evt: BBRawHookEvent) => {
     state = "pending";
     description = "Build started";
   }
+
+  // Not a PR build
+  if (!evt.data.properties.pr_number && evt.data.properties.branch[0] === "master") {
+    events.dispatch("buildbot", new ReleaseBuildEvent(
+      evt.data.url, evt.data.builder.name,
+      evt.data.properties.repository[0],
+      evt.data.properties.revision[0],
+      state
+    ));
+    return;
+  }
+
   events.dispatch("buildbot", new BuildEvent(evt.data.url, evt.data.builder.name,
                                              evt.data.properties.repository[0],
                                              evt.data.properties.revision[0],

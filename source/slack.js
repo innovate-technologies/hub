@@ -6,7 +6,7 @@ import config from "config";
 import { Html5Entities as Entities } from "html-entities";
 import { CLIENT_EVENTS, RTM_EVENTS, MemoryDataStore, RtmClient, WebClient } from "@slack/client";
 
-import { BuildEvent } from "app/build-events.js";
+import { BuildEvent, ReleaseBuildEvent } from "app/build-events.js";
 import * as events from "app/events.js";
 import * as github from "app/github.js";
 import log from "app/logs.js";
@@ -338,6 +338,17 @@ events.listen(BuildEvent.name, async (evt: BuildEvent) => {
     message = `[<${getRepoLink(evt.repo)}|${evt.repo}>] build for <${evt.prUrl}|#${evt.pr}> aborted`
       + ` :red_circle: - ${evt.description}`;
   }
+  const options = { "as_user": true, "unfurl_links": false };
+  await web.chat.postMessage(DEV_CHANNEL, message, options);
+});
+
+events.listen(ReleaseBuildEvent.name, async (evt: ReleaseBuildEvent) => {
+  if (evt.state === "pending") {
+    return;
+  }
+  const status = BUILD_STATUSES[evt.state] || "???";
+  let message = `[<${getRepoLink(evt.repo)}|${evt.repo}>] release build for `
+    + `${formatHash(evt.revision)} ${status} on builder <${evt.url}|${evt.builder}>`;
   const options = { "as_user": true, "unfurl_links": false };
   await web.chat.postMessage(DEV_CHANNEL, message, options);
 });

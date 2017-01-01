@@ -4,6 +4,14 @@
 
 import * as events from "app/events.js";
 
+export class ReleaseBuildEvent extends events.Event {
+  url: string; builder: string; repo: string; revision: string; state: BuildEventState;
+  constructor(url: string, builder: string, repo: string, revision: string, state: BuildEventState) {
+    super();
+    Object.assign(this, { url, builder, repo, revision, state });
+  }
+}
+
 export type BuildEventState = | "pending" | "success" | "failure";
 export class BuildEvent extends events.Event {
   url: string; builder: string; repo: string; revision: string; pr: number; state: BuildEventState;
