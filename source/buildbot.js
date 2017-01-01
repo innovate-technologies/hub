@@ -103,18 +103,22 @@ const BUILDBOT_RESULTS_INT_MAP: [{state: BuildEventState, description: string}] 
   { state: "failure", description: "Build failed" }, // 2
 ];
 events.listen(BBRawHookEvent.name, (evt: BBRawHookEvent) => {
+  if (!evt.data.properties.pr_number || !evt.data.properties.repository) {
+    return;
+  }
+
   let state: BuildEventState = "pending";
   let description: string = "Unknown";
   if (evt.data.complete) {
-    ({ state, description } = BUILDBOT_RESULTS_INT_MAP[evt.data.build.results]);
+    ({ state, description } = BUILDBOT_RESULTS_INT_MAP[evt.data.results]);
   } else {
     state = "pending";
     description = "Build started";
   }
   events.dispatch("buildbot", new BuildEvent(evt.data.url, evt.data.builder.name,
-                                             evt.data.properties.repository,
-                                             evt.data.properties.revision,
-                                             parseInt(evt.data.properties.pr_number, 10),
+                                             evt.data.properties.repository[0],
+                                             evt.data.properties.revision[0],
+                                             parseInt(evt.data.properties.pr_number[0], 10),
                                              state, description));
 });
 
