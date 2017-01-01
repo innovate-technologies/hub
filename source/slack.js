@@ -231,6 +231,23 @@ events.listen(github.GHPullRequestEvent.name, async (evt: github.GHPullRequestEv
   await web.chat.postMessage(DEV_CHANNEL, message, options);
 });
 
+events.listen(github.GHPullRequestReviewEvent.name, async (evt: github.GHPullRequestReviewEvent) => {
+  let action: string = evt.action + " review on";
+  if (evt.action === "submitted") {
+    switch (evt.state) {
+      case "approved": action = "approved"; break;
+      case "commented": action = "reviewed and commented on"; break;
+      case "changes_requested": action = "requested changes to"; break;
+      case "dismissed": action = "dismissed their review on"; break;
+    }
+  }
+  const message = `[<${getRepoLink(evt.pr.repo)}|${evt.pr.repo}>] ${formatName(evt.reviewer)}`
+    + ` ${action} pull request <${evt.pr.url}|#${evt.pr.id}: ${evt.pr.title}>`
+    + ` (${evt.pr.baseRefName}..${evt.pr.headRefName})`;
+  const options = { "as_user": true, "unfurl_links": false };
+  await web.chat.postMessage(DEV_CHANNEL, message, options);
+});
+
 events.listen(github.GHPullRequestReviewCommentEvent.name,
   async (evt: github.GHPullRequestReviewCommentEvent) => {
     const action = evt.action === "created" ? "commented" : `${evt.action} comment`;
@@ -251,6 +268,9 @@ events.listen(github.GHPullRequestReviewCommentEvent.name,
 );
 
 events.listen(github.GHCommitCommentEvent.name, async (evt: github.GHCommitCommentEvent) => {
+  if (evt.isPartOfReview) {
+    return;
+  }
   const action = evt.action === "created" ? "commented" : `${evt.action} comment`;
   const message = `[<${getRepoLink(evt.repo)}|${evt.repo}>] ${formatName(evt.who)}`
     + ` <${evt.url}|${action}> on commit <${evt.url}|${formatHash(evt.commitId)}>`;

@@ -75,6 +75,7 @@ syncUsers(trustedUsers, TRUSTED_USERS_GROUP);
 const WEBHOOK_REPO_EVENTS = [
   "push",
   "pull_request",
+  "pull_request_review",
   "pull_request_review_comment",
   "commit_comment",
   "issues",
@@ -233,14 +234,22 @@ export class GHPullRequestReviewCommentEvent extends events.Event {
   }
 }
 
+export class GHPullRequestReviewEvent extends events.Event {
+  pr: GHPullRequest; reviewer: string; action: string; state: string; url: string;
+  constructor(pr: GHPullRequest, reviewer: string, action: string, state: string, url: string) {
+    super();
+    Object.assign(this, { pr, reviewer, action, state, url });
+  }
+}
+
 export class GHCommitCommentEvent extends events.Event {
   repo: string; commenter: string; commitId: string; body: string;
-  action: string; who: string; url: string;
+  action: string; who: string; url: string; isPartOfReview: bool;
 
   constructor(repo: string, commenter: string, commitId: string, body: string,
-              action: string, who: string, url: string) {
+              action: string, who: string, url: string, isPartOfReview: bool) {
     super();
-    Object.assign(this, { repo, commenter, commitId, body, action, who, url });
+    Object.assign(this, { repo, commenter, commitId, body, action, who, url, isPartOfReview });
   }
 }
 
@@ -286,6 +295,13 @@ events.listen(GHRawHookEvent.name, function rawEventConverter(evt: GHRawHookEven
       ));
       break;
 
+    case "pull_request_review":
+      events.dispatch(SOURCE, new GHPullRequestReviewEvent(
+        new GHPullRequest(data.repository.full_name, data.pull_request),
+        data.sender.login, data.action, data.review.state, data.review.html_url
+      ));
+      break;
+
     case "pull_request_review_comment":
       events.dispatch(SOURCE, new GHPullRequestReviewCommentEvent(
         new GHPullRequest(data.repository.full_name, data.pull_request),
@@ -294,12 +310,16 @@ events.listen(GHRawHookEvent.name, function rawEventConverter(evt: GHRawHookEven
       ));
       break;
 
-    case "commit_comment":
+    case "commit_comment": {
+      const isPartOfReview: bool = data.action === "created" && data.comment.pull_request_review_id
+        && data.comment.created_at === data.comment.updated_at;
+
       events.dispatch(SOURCE, new GHCommitCommentEvent(
         data.repository.full_name, data.comment.user.login, data.comment.commit_id,
-        data.comment.body, data.action, data.sender.login, data.comment.html_url
+        data.comment.body, data.action, data.sender.login, data.comment.html_url, isPartOfReview
       ));
       break;
+    }
 
     case "issues":
       events.dispatch(SOURCE, new GHIssueEvent(
