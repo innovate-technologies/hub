@@ -250,6 +250,9 @@ events.listen(github.GHPullRequestReviewEvent.name, async (evt: github.GHPullReq
 
 events.listen(github.GHPullRequestReviewCommentEvent.name,
   async (evt: github.GHPullRequestReviewCommentEvent) => {
+    if (evt.isPartOfReview) {
+      return;
+    }
     const action = evt.action === "created" ? "commented" : `${evt.action} comment`;
     const message = `[<${getRepoLink(evt.pr.repo)}|${evt.pr.repo}>] ${formatName(evt.who)}`
       + ` <${evt.url}|${action}> on pull request <${evt.pr.url}|#${evt.pr.id}> (${evt.pr.title})`
@@ -268,9 +271,6 @@ events.listen(github.GHPullRequestReviewCommentEvent.name,
 );
 
 events.listen(github.GHCommitCommentEvent.name, async (evt: github.GHCommitCommentEvent) => {
-  if (evt.isPartOfReview) {
-    return;
-  }
   const action = evt.action === "created" ? "commented" : `${evt.action} comment`;
   const message = `[<${getRepoLink(evt.repo)}|${evt.repo}>] ${formatName(evt.who)}`
     + ` <${evt.url}|${action}> on commit <${evt.url}|${formatHash(evt.commitId)}>`;
