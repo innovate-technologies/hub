@@ -150,7 +150,7 @@ events.listen(slack.SlackMessageEvent.name, async (evt: slack.SlackMessageEvent)
 
 // GitHub triggers
 events.listen(github.GHPullRequestEvent.name, async (evt: github.GHPullRequestEvent) => {
-  if (evt.action !== "synchronize") {
+  if (evt.action !== "synchronize" || evt.action !== "opened") {
     return;
   }
   events.dispatch("internal", new events.InternalEvent("Rebuilding " + evt.pr.repo +
