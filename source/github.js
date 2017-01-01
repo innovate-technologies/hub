@@ -304,7 +304,7 @@ events.listen(GHRawHookEvent.name, function rawEventConverter(evt: GHRawHookEven
 
     case "pull_request_review_comment": {
       const isPartOfReview: bool = data.action === "created" && data.comment.pull_request_review_id
-        && data.comment.created_at === data.comment.updated_at;
+        && data.comment.created_at !== data.comment.updated_at;
       events.dispatch(SOURCE, new GHPullRequestReviewCommentEvent(
         new GHPullRequest(data.repository.full_name, data.pull_request),
         data.comment.user.login, data.comment.commit_id, data.body,
