@@ -129,7 +129,7 @@ events.listen(BBRawHookEvent.name, (evt: BBRawHookEvent) => {
 
   events.dispatch("buildbot", new BuildEvent(evt.data.url, evt.data.builder.name,
                                              evt.data.properties.repository[0],
-                                             evt.data.properties.revision[0],
+                                             evt.data.properties.head_rev[0],
                                              parseInt(evt.data.properties.pr_number[0], 10),
                                              state, description));
 });
