@@ -232,6 +232,9 @@ events.listen(github.GHPullRequestEvent.name, async (evt: github.GHPullRequestEv
 });
 
 events.listen(github.GHPullRequestReviewEvent.name, async (evt: github.GHPullRequestReviewEvent) => {
+  if (evt.hasOnlyOneComment) {
+    return;
+  }
   let action: string = evt.action + " review on";
   if (evt.action === "submitted") {
     switch (evt.state) {

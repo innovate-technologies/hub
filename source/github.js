@@ -11,9 +11,10 @@ import { parse as parseUrl, format as formatUrl } from "url";
 
 const API_ENDPOINT = "https://api.github.com";
 type MethodType = | "GET" | "POST" | "PATCH" | "DELETE";
-export const request = async (url: string, body: ?Object, method: ?MethodType): Promise<*> => {
+export const request = async (url: string, body: ?Object, method: ?MethodType,
+                              accept: string = "application/json"): Promise<*> => {
   const res = await fetch(url, { method, body: JSON.stringify(body), headers: {
-    "Accept": "application/json",
+    "Accept": accept,
     "Content-Type": "application/json",
     "User-Agent": "Innovate Hub (innovate-technologies/hub)",
     "Authorization": "Basic " + new Buffer(config.get("github.auth.username") + ":" +
@@ -139,6 +140,14 @@ const installHookForRepos = async () => {
 installHookForOrg();
 installHookForRepos();
 
+const isSingleCommentReview = async (repo: string, prId: number, reviewId: number) => {
+  const url = API_ENDPOINT + `/repos/${repo}/pulls/${prId}/reviews/${reviewId}/comments`;
+  // This Accept type should continue to work even after the preview period ends.
+  const req = await request(url, {}, "GET", "application/vnd.github.black-cat-preview+json");
+  const comments = await req.json();
+  return comments.length === 1;
+};
+
 
 type Author = { name: string, email: string };
 class GHCommit {
@@ -236,9 +245,11 @@ export class GHPullRequestReviewCommentEvent extends events.Event {
 
 export class GHPullRequestReviewEvent extends events.Event {
   pr: GHPullRequest; reviewer: string; action: string; state: string; url: string;
-  constructor(pr: GHPullRequest, reviewer: string, action: string, state: string, url: string) {
+  hasOnlyOneComment: bool;
+  constructor(pr: GHPullRequest, reviewer: string, action: string, state: string, url: string,
+              hasOnlyOneComment: bool) {
     super();
-    Object.assign(this, { pr, reviewer, action, state, url });
+    Object.assign(this, { pr, reviewer, action, state, url, hasOnlyOneComment });
   }
 }
 
@@ -273,7 +284,7 @@ export class GHIssueCommentEvent extends events.Event {
   }
 }
 
-events.listen(GHRawHookEvent.name, function rawEventConverter(evt: GHRawHookEvent) {
+events.listen(GHRawHookEvent.name, async (evt: GHRawHookEvent) => {
   const SOURCE = "gh-evt-cvt";
   const data: Object = evt.data;
   switch (evt.event) {
@@ -298,7 +309,9 @@ events.listen(GHRawHookEvent.name, function rawEventConverter(evt: GHRawHookEven
     case "pull_request_review":
       events.dispatch(SOURCE, new GHPullRequestReviewEvent(
         new GHPullRequest(data.repository.full_name, data.pull_request),
-        data.sender.login, data.action, data.review.state, data.review.html_url
+        data.sender.login, data.action, data.review.state, data.review.html_url,
+        await isSingleCommentReview(data.repository.full_name, data.pull_request.number,
+                                    data.review.id),
       ));
       break;
 
