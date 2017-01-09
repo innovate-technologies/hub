@@ -12,9 +12,9 @@ import { parse as parseUrl, format as formatUrl } from "url";
 const API_ENDPOINT = "https://api.github.com";
 type MethodType = | "GET" | "POST" | "PATCH" | "DELETE";
 export const request = async (url: string, body: ?Object, method: ?MethodType,
-                              accept: string = "application/json"): Promise<*> => {
+                              accept: ?string): Promise<*> => {
   const res = await fetch(url, { method, body: JSON.stringify(body), headers: {
-    "Accept": accept,
+    "Accept": accept || "application/json",
     "Content-Type": "application/json",
     "User-Agent": "Innovate Hub (innovate-technologies/hub)",
     "Authorization": "Basic " + new Buffer(config.get("github.auth.username") + ":" +
