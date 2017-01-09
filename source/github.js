@@ -145,7 +145,7 @@ const isSingleCommentReview = async (repo: string, prId: number, reviewId: numbe
   // This Accept type should continue to work even after the preview period ends.
   const req = await request(url, {}, "GET", "application/vnd.github.black-cat-preview+json");
   const comments = await req.json();
-  return comments.length === 1;
+  return comments.length === 1 && comments[0].created_at === comments[0].updated_at;
 };
 
 
