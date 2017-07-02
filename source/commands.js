@@ -2,10 +2,15 @@
 // This file is part of hub. Refer to license.txt for more information.
 // @flow
 
+import * as _ from "lodash";
 import * as events from "app/events.js";
 import log from "app/logs.js";
 import { SlackMessageEvent, sendMessage } from "app/slack.js";
 import { exec } from "app/utils.js";
+
+const removeDuplicateLines = (text) => {
+  return _.uniq(text.split("\n")).join("\n")
+}
 
 events.listen(SlackMessageEvent.name, async (event: SlackMessageEvent) => {
   if (!event.isDirect) {
@@ -37,11 +42,11 @@ events.listen(SlackMessageEvent.name, async (event: SlackMessageEvent) => {
     try {
       await sendMessage(event.channel, "Updating the London cluster");
       const outputLdn = await exec("ssh", ["innobot@itframe-swarm.innovatete.ch", "docker service update --image innovate/itframe:latest --detach=false itframe-ldn"]);
-      await sendMessage(event.channel, "Done, here is the output:\n```" + outputLdn + "```");
+      await sendMessage(event.channel, "Done, here is the output:\n```" + removeDuplicateLines(outputLdn) + "```");
 
       await sendMessage(event.channel, "Updating the Frankfurt cluster");
       const outputFra = await exec("ssh", ["innobot@itframe-swarm.innovatete.ch", "docker service update --image innovate/itframe:latest --detach=false itframe-fra"]);
-      await sendMessage(event.channel, "Done, here is the output:\n```" + outputFra + "```");
+      await sendMessage(event.channel, "Done, here is the output:\n```" + removeDuplicateLines(outputFra) + "```");
     } catch (error) {
       log.error(error);
       await sendMessage(event.channel, "I couldn't do that.");
