@@ -50,6 +50,7 @@ events.listen(SlackMessageEvent.name, async (event: SlackMessageEvent) => {
     } catch (error) {
       log.error(error);
       await sendMessage(event.channel, "I couldn't do that.");
+      await sendMessage(event.channel, "Here is the error:\n```" + removeDuplicateLines(error) + "```");
     }
 
     return;
