@@ -30,4 +30,22 @@ events.listen(SlackMessageEvent.name, async (event: SlackMessageEvent) => {
     process.exit(0);
     return;
   }
+
+  if (event.trusted && event.message.endsWith("update ITFrame")) {
+    await sendMessage(event.channel, "Starting update");
+     try {
+      await sendMessage(event.channel, "Updating the London cluster");
+      const outputLdn = await exec("ssh", ["innobot@itframe-swarm", "'docker service update --image innovate/itframe:latest --detach=false itframe-ldn'"]);
+      await sendMessage(event.channel, "Done, here is the output of:\n" + outputLdn);
+
+      await sendMessage(event.channel, "Updating the Frankfurt cluster");
+      const outputFra = await exec("ssh", ["innobot@itframe-swarm", "'docker service update --image innovate/itframe:latest --detach=false itframe-fra'"]);
+      await sendMessage(event.channel, "Done, here is the output of:\n" + outputFra);
+    } catch (error) {
+      log.error(error);
+      await sendMessage(event.channel, "I couldn't do that.");
+    }
+    
+    return;
+  }
 });
