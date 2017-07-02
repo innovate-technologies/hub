@@ -35,11 +35,11 @@ events.listen(SlackMessageEvent.name, async (event: SlackMessageEvent) => {
     await sendMessage(event.channel, "Starting update");
      try {
       await sendMessage(event.channel, "Updating the London cluster");
-      const outputLdn = await exec("ssh", ["innobot@itframe-swarm", "'docker service update --image innovate/itframe:latest --detach=false itframe-ldn'"]);
+      const outputLdn = await exec("ssh", ["innobot@itframe-swarm.innovatete.ch", "'docker service update --image innovate/itframe:latest --detach=false itframe-ldn'"]);
       await sendMessage(event.channel, "Done, here is the output of:\n" + outputLdn);
 
       await sendMessage(event.channel, "Updating the Frankfurt cluster");
-      const outputFra = await exec("ssh", ["innobot@itframe-swarm", "'docker service update --image innovate/itframe:latest --detach=false itframe-fra'"]);
+      const outputFra = await exec("ssh", ["innobot@itframe-swarm.innovatete.ch", "'docker service update --image innovate/itframe:latest --detach=false itframe-fra'"]);
       await sendMessage(event.channel, "Done, here is the output of:\n" + outputFra);
     } catch (error) {
       log.error(error);
