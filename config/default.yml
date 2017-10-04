@@ -15,6 +15,10 @@ github:
   notify:
     - innovate-technologies/hub
 
+  # Repos to build.
+  build:
+    - innovate-technologies/control
+
   trustedUsers:
     group: innovate-technologies/trusted-developers
 

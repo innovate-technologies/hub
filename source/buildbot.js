@@ -168,6 +168,9 @@ events.listen(github.GHPullRequestEvent.name, async (evt: github.GHPullRequestEv
   if (evt.action !== "synchronize" && evt.action !== "opened") {
     return;
   }
+  if (!config.get("github.build").includes(evt.pr.repo)) {
+    return;
+  }
   events.dispatch("internal", new events.InternalEvent("Rebuilding " + evt.pr.repo +
                                                        " PR " + evt.pr.id + " (via push)"));
   await buildPullRequest(evt.who, evt.pr.isFromTrustedAuthor, evt.pr.repo, evt.pr.id);
