@@ -73,7 +73,7 @@ app.post("/buildbot/" + BB_HOOK_TOKEN, (req, res) => {
 
 // Centowatch
 const CENTOWATCH_HOOK_TOKEN: string = config.get("centowatch.token");
-app.post("/centowatch?token=" + CENTOWATCH_HOOK_TOKEN, (req, res) => {
+app.post("/centowatch/" + CENTOWATCH_HOOK_TOKEN, (req, res) => {
   if (typeof req.body.event !== "string" || typeof req.body.data !== "object") {
     throw new Error("Bad request");
   }
