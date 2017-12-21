@@ -7,10 +7,12 @@ import { Html5Entities as Entities } from "html-entities";
 import { CLIENT_EVENTS, RTM_EVENTS, MemoryDataStore, RtmClient, WebClient } from "@slack/client";
 
 import { BuildEvent, ReleaseBuildEvent } from "app/build-events.js";
+import * as centowatch from "app/centowatch.js";
 import * as events from "app/events.js";
 import * as github from "app/github.js";
 import log from "app/logs.js";
 import util from "util";
+import { reverseDns } from "app/utils.js";
 import * as whmcs from "app/whmcs.js";
 
 const entities = new Entities();
@@ -354,4 +356,17 @@ events.listen(ReleaseBuildEvent.name, async (evt: ReleaseBuildEvent) => {
     + `${formatHash(evt.revision)} ${status} on builder <${evt.url}|${evt.builder}>`;
   const options = { "as_user": true, "unfurl_links": false };
   await web.chat.postMessage(DEV_CHANNEL, message, options);
+});
+
+// Centowatch events
+events.listen(centowatch.CentowatchLogEvent.name, async (evt: centowatch.CentowatchLogEvent) => {
+  const options = { "as_user": true, "unfurl_links": false };
+  await web.chat.postMessage("#centowatch",
+      `[${await reverseDns(evt.ip)} ${evt.ip}] ${evt.message}`, options);
+});
+
+events.listen(centowatch.CentowatchErrorEvent.name, async (evt: centowatch.CentowatchErrorEvent) => {
+  const options = { "as_user": true, "unfurl_links": false };
+  await web.chat.postMessage("#centowatch",
+      `[${await reverseDns(evt.ip)} ${evt.ip}] :red_circle: ${evt.message} ${evt.error}`, options);
 });

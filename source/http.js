@@ -14,6 +14,7 @@ import { Html5Entities as Entities } from "html-entities";
 import * as _ from "lodash";
 
 import * as buildbot from "app/buildbot.js";
+import * as centowatch from "app/centowatch.js";
 import * as events from "app/events.js";
 import * as github from "app/github.js";
 import log from "app/logs.js";
@@ -70,7 +71,15 @@ app.post("/buildbot/" + BB_HOOK_TOKEN, (req, res) => {
   res.status(204).send();
 });
 
-// BBRawHookEvent
+// Centowatch
+const CENTOWATCH_HOOK_TOKEN: string = config.get("centowatch.token");
+app.post("/centowatch?token=" + CENTOWATCH_HOOK_TOKEN, (req, res) => {
+  if (typeof req.body.event !== "string" || typeof req.body.data !== "object") {
+    throw new Error("Bad request");
+  }
+  events.dispatch("http", new centowatch.CentowatchRawHookEvent(req.body.event, req.body.data, req.ip));
+  res.status(204).send();
+});
 
 // GitHub
 const GH_HOOK_SECRET: string = config.get("github.hookSecret");

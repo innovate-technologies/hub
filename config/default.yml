@@ -44,3 +44,5 @@ buildbot:
   jobdir: /srv/buildbot-pr-jobdir
   buildbotBin: /home/buildbot/bb-master/bin/buildbot
 
+centowatch:
+  token: "xxx"

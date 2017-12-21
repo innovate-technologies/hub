@@ -3,6 +3,7 @@
 // @flow
 
 import { execFile } from "child_process";
+import dns from "dns";
 import util from "util";
 
 import * as events from "app/events.js";
@@ -18,6 +19,16 @@ export const exec = (binary: string, args: Array<string>, options: Object = {}) 
     });
   });
 };
+
+export const reverseDns = (ip: string): Promise<string> => new Promise((resolve, reject) => {
+  dns.reverse(ip, (error, hostnames) => {
+    if (error) {
+      reject(error);
+      return;
+    }
+    resolve(hostnames[0] || "(unknown)");
+  });
+});
 
 export const escapeShell = (command: string) => {
   return '"' + command.replace(/(["'$`\\])/g, "\\$1") + '"';
