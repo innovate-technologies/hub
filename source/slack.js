@@ -362,11 +362,11 @@ events.listen(ReleaseBuildEvent.name, async (evt: ReleaseBuildEvent) => {
 events.listen(centowatch.CentowatchLogEvent.name, async (evt: centowatch.CentowatchLogEvent) => {
   const options = { "as_user": true, "unfurl_links": false };
   await web.chat.postMessage("#centowatch",
-      `[${await reverseDns(evt.ip)} ${evt.ip}] ${evt.message}`, options);
+      `[${await reverseDns(evt.ip) || evt.ip}] ${evt.message}`, options);
 });
 
 events.listen(centowatch.CentowatchErrorEvent.name, async (evt: centowatch.CentowatchErrorEvent) => {
   const options = { "as_user": true, "unfurl_links": false };
   await web.chat.postMessage("#centowatch",
-      `[${await reverseDns(evt.ip)} ${evt.ip}] :red_circle: ${evt.message} ${evt.error}`, options);
+      `[${await reverseDns(evt.ip) || evt.ip}] :red_circle: ${evt.message} ${evt.error}`, options);
 });

@@ -26,7 +26,7 @@ export const reverseDns = (ip: string): Promise<string> => new Promise((resolve,
       reject(error);
       return;
     }
-    resolve(hostnames[0] || "(unknown)");
+    resolve(hostnames[0] || "");
   });
 });
 
