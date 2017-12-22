@@ -368,5 +368,5 @@ events.listen(centowatch.CentowatchLogEvent.name, async (evt: centowatch.Centowa
 events.listen(centowatch.CentowatchErrorEvent.name, async (evt: centowatch.CentowatchErrorEvent) => {
   const options = { "as_user": true, "unfurl_links": false };
   await web.chat.postMessage("#centowatch",
-      `[${await reverseDns(evt.ip) || evt.ip}] :red_circle: ${evt.message} ${evt.error}`, options);
+      `[${await reverseDns(evt.ip) || evt.ip}] :red_circle: ${evt.message}\n\`\`\`${util.inspect(evt.error, { depth: null })}\`\`\``, options);
 });
