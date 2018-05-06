@@ -171,6 +171,10 @@ const DEV_CHANNEL = config.get("slack.notify.dev");
 const getRepoLink = (repo: string) => "https://github.com/" + repo;
 const formatHash = (hash: string) => "`" + hash.substring(0, 7) + "`";
 events.listen(github.GHPushEvent.name, async (evt: github.GHPushEvent) => {
+  if (evt.pusher === "dependabot[bot]") {
+    return;
+  }
+
   const repoLink = getRepoLink(evt.repo);
   const commits = evt.commits.filter((commit) => commit.distinct);
 
@@ -217,6 +221,10 @@ events.listen(github.GHPushEvent.name, async (evt: github.GHPushEvent) => {
 });
 
 events.listen(github.GHPullRequestEvent.name, async (evt: github.GHPullRequestEvent) => {
+  if (evt.who === "dependabot[bot]") {
+    return;
+  }
+
   const action = evt.action === "synchronize" ? "synchronised" : evt.action;
   const message = `[<${getRepoLink(evt.pr.repo)}|${evt.pr.repo}>] ${formatName(evt.who)}`
     + ` ${action} pull request <${evt.pr.url}|#${evt.pr.id}: ${evt.pr.title}>`
