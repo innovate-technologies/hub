@@ -22,7 +22,7 @@
     "lodash": "^4.15.0",
     "node-fetch": "^1.6.0",
     "uuid": "^3.0.1",
-    "snyk": "^1.162.0"
+    "snyk": "^1.192.4"
   },
   "devDependencies": {
     "babel-eslint": "^6.0.0",
