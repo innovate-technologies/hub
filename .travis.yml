@@ -1,0 +1,23 @@
+sudo: required
+language: node_js
+node_js:
+- '12'
+services:
+- docker
+os:
+- linux
+
+stages:
+  - name: build
+    if: type = push AND branch = master
+
+jobs:
+  include:
+    - name: 'build'
+      stage: build
+      script:
+        - docker build -t innovate/hub:latest .
+        - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
+        - if [[ "$TRAVIS_BRANCH" == "master" ]]; then docker push innovate/hub:latest; fi
+        - docker tag innovate/hub:latest innovate/itframe:$TRAVIS_COMMIT
+        - docker push innovate/hub:$TRAVIS_COMMIT
