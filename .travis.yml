@@ -19,5 +19,5 @@ jobs:
         - docker build -t innovate/hub:latest .
         - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
         - if [[ "$TRAVIS_BRANCH" == "master" ]]; then docker push innovate/hub:latest; fi
-        - docker tag innovate/hub:latest innovate/itframe:$TRAVIS_COMMIT
+        - docker tag innovate/hub:latest innovate/hub:$TRAVIS_COMMIT
         - docker push innovate/hub:$TRAVIS_COMMIT
