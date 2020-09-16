@@ -20,7 +20,7 @@
     "html-entities": "^1.2.0",
     "js-yaml": "^3.4.0",
     "lodash": "^4.15.0",
-    "node-fetch": "^1.6.0",
+    "node-fetch": "^2.6.1",
     "uuid": "^3.0.1"
   },
   "devDependencies": {
